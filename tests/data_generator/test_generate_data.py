@@ -24,9 +24,9 @@ def test_generate_customer():
 
 def test_generate_transaction():
     """Test transaction data generation."""
-    customer = {"account_id": "GE1"}
+    customer = generate_customer("Germany", 1)  # Create a valid customer first
     transaction = generate_transaction(customer)
-    assert transaction["account_id"] == "GE1"
+    assert transaction["account_id"] == customer["account_id"]
     assert isinstance(transaction["transaction_amount"], float)
     assert transaction["transaction_currency"] == "EUR"
     assert transaction["transaction_type"] in [

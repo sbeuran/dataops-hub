@@ -32,16 +32,18 @@ def mock_dataframes():
     return transactions_df, customers_df
 
 
-@patch('src.etl.transaction_etl.col')
-@patch('src.etl.transaction_etl.when')
-@patch('src.etl.transaction_etl.current_timestamp')
+@patch("src.etl.transaction_etl.col")
+@patch("src.etl.transaction_etl.when")
+@patch("src.etl.transaction_etl.current_timestamp")
 def test_transform_data(mock_current_timestamp, mock_when, mock_col, mock_dataframes):
     """Test data transformation logic."""
     # Setup mocks
     transactions_df, customers_df = mock_dataframes
-    mock_when.return_value.when.return_value.otherwise.return_value = "mocked_risk_score"
+    mock_when.return_value.when.return_value.otherwise.return_value = (
+        "mocked_risk_score"
+    )
     mock_current_timestamp.return_value = datetime(2024, 2, 13, 10, 0, 0)
-    
+
     # Transform data
     result_df = transform_data(transactions_df, customers_df)
 
@@ -56,4 +58,6 @@ def test_transform_data(mock_current_timestamp, mock_when, mock_col, mock_datafr
     # Verify DataFrame operations were called correctly
     transactions_df.join.assert_called_once_with(customers_df, "account_id")
     assert transactions_df.select.call_count == 1
-    assert transactions_df.withColumn.call_count >= 2  # One for risk_score, one for processed_at
+    assert (
+        transactions_df.withColumn.call_count >= 2
+    )  # One for risk_score, one for processed_at

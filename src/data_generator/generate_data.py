@@ -86,9 +86,11 @@ def generate_transaction(customer: Dict) -> Dict:
         "FR": "France",
         "IT": "Italy",
         "ES": "Spain",
-        "PT": "Portugal"
+        "PT": "Portugal",
     }
-    country = country_map[customer["IBAN"][:2]]  # Use IBAN country code instead of account_id
+    country = country_map[
+        customer["IBAN"][:2]
+    ]  # Use IBAN country code instead of account_id
     fake = fake_generators[country]
     transaction_date = datetime.now() - timedelta(days=random.randint(0, 365))
 
