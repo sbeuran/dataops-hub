@@ -1,4 +1,8 @@
-from src.data_generator.generate_data import generate_iban, generate_customer, generate_transaction
+from src.data_generator.generate_data import (
+    generate_customer,
+    generate_iban,
+    generate_transaction,
+)
 
 
 def test_generate_iban():

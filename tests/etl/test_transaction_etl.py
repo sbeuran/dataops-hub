@@ -1,6 +1,12 @@
 import pytest
 from pyspark.sql import SparkSession
-from pyspark.sql.types import DoubleType, StringType, StructField, StructType, TimestampType
+from pyspark.sql.types import (
+    DoubleType,
+    StringType,
+    StructField,
+    StructType,
+    TimestampType,
+)
 
 from src.etl.transaction_etl import transform_data
 
@@ -53,9 +59,7 @@ def test_transform_data(spark):
         )
     ]
 
-    customer_data = [
-        ("GE1", "Checking", "Active", 1000.0, "Germany")
-    ]
+    customer_data = [("GE1", "Checking", "Active", 1000.0, "Germany")]
 
     # Create DataFrames
     transactions_df = spark.createDataFrame(transaction_data, transaction_schema)
