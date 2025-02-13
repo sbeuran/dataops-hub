@@ -80,7 +80,16 @@ def generate_customer(country: str, customer_id: int) -> Dict:
 
 def generate_transaction(customer: Dict) -> Dict:
     """Generate a fake transaction for a customer."""
-    fake = fake_generators[customer["account_id"][:2]]
+    # Map the account_id prefix to country name
+    country_map = {
+        "DE": "Germany",
+        "FR": "France",
+        "IT": "Italy",
+        "ES": "Spain",
+        "PT": "Portugal"
+    }
+    country = country_map[customer["IBAN"][:2]]  # Use IBAN country code instead of account_id
+    fake = fake_generators[country]
     transaction_date = datetime.now() - timedelta(days=random.randint(0, 365))
 
     return {

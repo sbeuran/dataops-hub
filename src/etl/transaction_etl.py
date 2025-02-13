@@ -52,6 +52,16 @@ def read_from_postgres(spark, credentials):
     return transactions_df, customers_df
 
 
+def calculate_risk_score(df):
+    """Calculate risk score based on fraud and suspicious flags."""
+    return df.withColumn(
+        "risk_score",
+        when(col("is_fraud") == "true", 1.0)
+        .when(col("is_suspicious") == "true", 0.7)
+        .otherwise(0.0),
+    )
+
+
 def transform_data(transactions_df, customers_df):
     """Transform the data."""
     # Join transactions with customer data
@@ -67,14 +77,10 @@ def transform_data(transactions_df, customers_df):
         "is_fraud",
         "is_suspicious",
         "account_owner_country",
-        col("transaction_amount").cast("double").alias("amount"),
     )
 
     # Add risk score
-    risk_scored = enriched_transactions.withColumn(
-        "risk_score",
-        when(col("is_fraud"), 1.0).when(col("is_suspicious"), 0.7).otherwise(0.0),
-    )
+    risk_scored = calculate_risk_score(enriched_transactions)
 
     # Add processing timestamp
     final_df = risk_scored.withColumn("processed_at", current_timestamp())
