@@ -1,7 +1,8 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, when, current_timestamp
-import boto3
 import json
+
+import boto3
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, current_timestamp, when
 
 
 def get_db_credentials():
