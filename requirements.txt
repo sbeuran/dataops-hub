@@ -1,0 +1,7 @@
+boto3==1.26.137
+Faker==18.4.0
+pandas==2.0.1
+psycopg2-binary==2.9.6
+SQLAlchemy==2.0.12
+python-dotenv==1.0.0
+pyspark==3.4.0 
