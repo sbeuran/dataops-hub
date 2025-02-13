@@ -29,4 +29,9 @@ def test_generate_transaction():
     assert transaction["account_id"] == "GE1"
     assert isinstance(transaction["transaction_amount"], float)
     assert transaction["transaction_currency"] == "EUR"
-    assert transaction["transaction_type"] in ["deposit", "withdrawal", "transfer", "payment"] 
+    assert transaction["transaction_type"] in [
+        "deposit",
+        "withdrawal",
+        "transfer",
+        "payment",
+    ]

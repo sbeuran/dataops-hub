@@ -74,4 +74,4 @@ def test_transform_data(spark):
     assert row.account_id == "GE1"
     assert row.transaction_amount == 100.0
     assert row.account_type == "Checking"
-    assert row.risk_score == 0.0  # Not fraud or suspicious 
+    assert row.risk_score == 0.0  # Not fraud or suspicious
