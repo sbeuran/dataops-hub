@@ -89,7 +89,9 @@ def generate_transaction(customer: Dict) -> Dict:
         "transaction_amount": round(random.uniform(10, 5000), 2),
         "transaction_currency": "EUR",
         "transaction_description": fake.text(max_nb_chars=100),
-        "transaction_type": random.choice(["deposit", "withdrawal", "transfer", "payment"]),
+        "transaction_type": random.choice(
+            ["deposit", "withdrawal", "transfer", "payment"]
+        ),
         "is_fraud": random.random() < 0.02,
         "is_suspicious": random.random() < 0.05,
     }

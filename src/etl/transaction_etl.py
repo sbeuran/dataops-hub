@@ -54,21 +54,19 @@ def read_from_postgres(spark, credentials):
 def transform_data(transactions_df, customers_df):
     """Transform the data."""
     # Join transactions with customer data
-    enriched_transactions = (
-        transactions_df.join(customers_df, "account_id").select(
-            "account_id",
-            "transaction_date",
-            "transaction_amount",
-            "transaction_currency",
-            "transaction_type",
-            "account_type",
-            "account_status",
-            "account_balance",
-            "is_fraud",
-            "is_suspicious",
-            "account_owner_country",
-            col("transaction_amount").cast("double").alias("amount"),
-        )
+    enriched_transactions = transactions_df.join(customers_df, "account_id").select(
+        "account_id",
+        "transaction_date",
+        "transaction_amount",
+        "transaction_currency",
+        "transaction_type",
+        "account_type",
+        "account_status",
+        "account_balance",
+        "is_fraud",
+        "is_suspicious",
+        "account_owner_country",
+        col("transaction_amount").cast("double").alias("amount"),
     )
 
     # Add risk score
