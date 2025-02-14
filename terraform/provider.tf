@@ -7,10 +7,11 @@ terraform {
   }
   
   backend "s3" {
-    bucket = "dataops-hub-terraform-state"
-    key    = "terraform.tfstate"
-    region = "eu-central-1"
-    encrypt = true
+    bucket         = "dataops-hub-terraform-state"
+    key            = "terraform.tfstate"
+    region         = "eu-central-1"
+    encrypt        = true
+    dynamodb_table = "terraform-state-lock"
   }
 }
 
