@@ -25,11 +25,21 @@ resource "aws_security_group" "rds" {
   description = "Security group for RDS cluster"
   vpc_id      = module.vpc.vpc_id
 
+  # Allow access from application security group
   ingress {
     from_port       = var.database_port
     to_port         = var.database_port
     protocol        = "tcp"
     security_groups = [aws_security_group.app.id]
+  }
+
+  # Allow access from specific IP for management
+  ingress {
+    from_port   = var.database_port
+    to_port     = var.database_port
+    protocol    = "tcp"
+    cidr_blocks = ["89.115.70.77/32"]
+    description = "Allow PostgreSQL access from admin IP"
   }
 
   egress {
