@@ -137,7 +137,7 @@ resource "aws_security_group_rule" "rds_bastion" {
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.bastion.id
   security_group_id        = aws_security_group.rds.id
-  description             = "Allow PostgreSQL access from bastion host"
+  description              = "Allow PostgreSQL access from bastion host"
 }
 
 # RDS Aurora PostgreSQL Cluster
