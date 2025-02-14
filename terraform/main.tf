@@ -115,7 +115,7 @@ resource "aws_rds_cluster_instance" "instances" {
 
   auto_minor_version_upgrade   = true
   performance_insights_enabled = var.enable_performance_insights
-  publicly_accessible         = true
+  publicly_accessible          = true
 }
 
 # Generate random master password for RDS
