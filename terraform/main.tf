@@ -16,8 +16,8 @@ module "vpc" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  create_database_subnet_group = true
-  create_database_subnet_route_table = true
+  create_database_subnet_group           = true
+  create_database_subnet_route_table     = true
   create_database_internet_gateway_route = true
 }
 
@@ -82,12 +82,12 @@ resource "aws_security_group" "app" {
 # RDS Aurora PostgreSQL Cluster
 resource "aws_rds_cluster" "main" {
   cluster_identifier = var.rds_cluster_identifier
-  engine             = "aurora-postgresql"
-  engine_mode        = "provisioned"
-  engine_version     = var.engine_version
-  database_name      = var.database_name
-  master_username    = var.database_username
-  master_password    = random_password.master.result
+  engine            = "aurora-postgresql"
+  engine_mode       = "provisioned"
+  engine_version    = var.engine_version
+  database_name     = var.database_name
+  master_username   = var.database_username
+  master_password   = random_password.master.result
 
   skip_final_snapshot = var.skip_final_snapshot
   deletion_protection = var.deletion_protection
