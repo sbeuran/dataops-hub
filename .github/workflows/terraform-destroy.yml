@@ -8,11 +8,6 @@ on:
         required: true
         type: string
 
-# Add permissions needed for OIDC
-permissions:
-  id-token: write
-  contents: read
-
 # Prevent concurrent destroy operations
 concurrency: 
   group: terraform-destroy
@@ -21,6 +16,8 @@ concurrency:
 env:
   AWS_REGION: eu-central-1
   TERRAFORM_VERSION: 1.4.6
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
   destroy:
@@ -32,12 +29,6 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
-
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-        aws-region: ${{ env.AWS_REGION }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
