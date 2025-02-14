@@ -118,16 +118,16 @@ resource "aws_db_subnet_group" "public" {
 
 # RDS Cluster Instances
 resource "aws_rds_cluster_instance" "instances" {
-  count                          = 2
-  identifier                     = "${var.rds_cluster_identifier}-${count.index + 1}"
-  cluster_identifier             = aws_rds_cluster.main.id
-  instance_class                 = var.rds_instance_class
-  engine                         = aws_rds_cluster.main.engine
-  engine_version                 = var.engine_version
-  db_subnet_group_name           = aws_db_subnet_group.public.id
-  auto_minor_version_upgrade     = true
-  performance_insights_enabled   = var.enable_performance_insights
-  publicly_accessible           = true
+  count                        = 2
+  identifier                   = "${var.rds_cluster_identifier}-${count.index + 1}"
+  cluster_identifier           = aws_rds_cluster.main.id
+  instance_class               = var.rds_instance_class
+  engine                       = aws_rds_cluster.main.engine
+  engine_version               = var.engine_version
+  db_subnet_group_name         = aws_db_subnet_group.public.id
+  auto_minor_version_upgrade   = true
+  performance_insights_enabled = var.enable_performance_insights
+  publicly_accessible          = true
 }
 
 # Generate random master password for RDS
