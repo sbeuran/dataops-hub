@@ -176,24 +176,3 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "data" {
     }
   }
 }
-
-# Output important information
-output "rds_cluster_endpoint" {
-  description = "RDS cluster endpoint"
-  value       = aws_rds_cluster.main.endpoint
-}
-
-output "rds_cluster_reader_endpoint" {
-  description = "RDS cluster reader endpoint"
-  value       = aws_rds_cluster.main.reader_endpoint
-}
-
-output "s3_bucket_name" {
-  description = "Name of the S3 bucket"
-  value       = aws_s3_bucket.data.id
-}
-
-output "secrets_manager_secret_name" {
-  description = "Name of the Secrets Manager secret containing RDS credentials"
-  value       = aws_secretsmanager_secret.rds_credentials.name
-}
