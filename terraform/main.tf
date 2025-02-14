@@ -17,6 +17,10 @@ module "vpc" {
   enable_dns_support           = true
   create_igw                   = true
 
+  # Ensure proper dependency management
+  manage_default_security_group = true
+  default_security_group_tags   = { Name = "dataops-hub-default-sg" }
+
   tags = {
     Environment = var.environment
     Project     = "dataops-hub"
@@ -80,46 +84,6 @@ resource "aws_security_group" "app" {
   }
 }
 
-# RDS Aurora PostgreSQL Cluster
-resource "aws_rds_cluster" "main" {
-  cluster_identifier              = var.rds_cluster_identifier
-  engine                          = "aurora-postgresql"
-  engine_mode                     = "provisioned"
-  engine_version                  = var.engine_version
-  database_name                   = var.database_name
-  master_username                 = var.database_username
-  master_password                 = random_password.master.result
-  db_subnet_group_name            = aws_db_subnet_group.public.id
-  vpc_security_group_ids          = [aws_security_group.rds.id]
-  port                            = var.database_port
-  backup_retention_period         = var.backup_retention_period
-  preferred_backup_window         = "03:00-04:00"
-  skip_final_snapshot            = true
-  final_snapshot_identifier      = null
-  deletion_protection            = false # Temporarily disable deletion protection
-  storage_encrypted              = var.storage_encrypted
-  enabled_cloudwatch_logs_exports = ["postgresql"]
-
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes = [
-      final_snapshot_identifier
-    ]
-  }
-
-  depends_on = [module.vpc]
-}
-
-# Create a subnet group using public subnets
-resource "aws_db_subnet_group" "public" {
-  name       = "dataops-hub-public"
-  subnet_ids = module.vpc.public_subnets
-
-  tags = {
-    Name = "dataops-hub-public"
-  }
-}
-
 # RDS Cluster Instances
 resource "aws_rds_cluster_instance" "instances" {
   count                        = 2
@@ -132,6 +96,55 @@ resource "aws_rds_cluster_instance" "instances" {
   auto_minor_version_upgrade   = true
   performance_insights_enabled = var.enable_performance_insights
   publicly_accessible          = true
+
+  timeouts {
+    create = "60m"
+    delete = "60m"
+  }
+}
+
+# Create a subnet group using public subnets
+resource "aws_db_subnet_group" "public" {
+  name       = "dataops-hub-public"
+  subnet_ids = module.vpc.public_subnets
+
+  tags = {
+    Name = "dataops-hub-public"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# RDS Aurora PostgreSQL Cluster
+resource "aws_rds_cluster" "main" {
+  cluster_identifier              = var.rds_cluster_identifier
+  engine                          = "aurora-postgresql"
+  engine_mode                     = "provisioned"
+  engine_version                  = var.engine_version
+  database_name                   = var.database_name
+  master_username                 = var.database_username
+  master_password                 = random_password.master.result
+  db_subnet_group_name            = aws_db_subnet_group.public.id
+  vpc_security_group_ids          = [aws_security_group.rds.id]
+  port                            = var.database_port
+  backup_retention_period         = 1
+  preferred_backup_window         = "03:00-04:00"
+  skip_final_snapshot            = true
+  apply_immediately              = true
+  deletion_protection            = false
+
+  timeouts {
+    create = "60m"
+    delete = "60m"
+  }
+
+  depends_on = [
+    module.vpc,
+    aws_db_subnet_group.public,
+    aws_security_group.rds
+  ]
 }
 
 # Generate random master password for RDS
@@ -141,24 +154,31 @@ resource "random_password" "master" {
 }
 
 # Store database credentials in AWS Secrets Manager
-resource "aws_secretsmanager_secret" "rds_credentials" {
-  name = "dataops-hub/rds-credentials"
-}
+# resource "aws_secretsmanager_secret" "rds_credentials" {
+#   name = "dataops-hub/rds-credentials"
+#   force_overwrite_replica_secret = true
+# }
 
-resource "aws_secretsmanager_secret_version" "rds_credentials" {
-  secret_id = aws_secretsmanager_secret.rds_credentials.id
-  secret_string = jsonencode({
-    username = var.database_username
-    password = random_password.master.result
-    host     = aws_rds_cluster.main.endpoint
-    port     = var.database_port
-    dbname   = var.database_name
-  })
-}
+# resource "aws_secretsmanager_secret_version" "rds_credentials" {
+#   secret_id = aws_secretsmanager_secret.rds_credentials.id
+#   secret_string = jsonencode({
+#     username = var.database_username
+#     password = random_password.master.result
+#     host     = aws_rds_cluster.main.endpoint
+#     port     = var.database_port
+#     dbname   = var.database_name
+#   })
+# }
 
 # S3 Bucket for data storage
 resource "aws_s3_bucket" "data" {
   bucket = "dataops-hub-data"
+  force_destroy = true  # Allow deletion of bucket with objects
+
+  tags = {
+    Name        = "dataops-hub-data"
+    Environment = var.environment
+  }
 }
 
 resource "aws_s3_bucket_versioning" "data" {

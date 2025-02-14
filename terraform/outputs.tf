@@ -49,7 +49,7 @@ output "s3_bucket_name" {
   value       = aws_s3_bucket.data.id
 }
 
-output "secrets_manager_secret_name" {
-  description = "Name of the Secrets Manager secret containing RDS credentials"
-  value       = aws_secretsmanager_secret.rds_credentials.name
-} 
+# output "secrets_manager_secret_name" {
+#   description = "Name of the Secrets Manager secret containing RDS credentials"
+#   value       = aws_secretsmanager_secret.rds_credentials.name
+# } 
