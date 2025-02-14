@@ -119,10 +119,10 @@ resource "aws_instance" "bastion" {
   key_name              = "dataops-hub-bastion"
 
   user_data = <<-EOF
-              #!/bin/bash
-              dnf update -y
-              dnf install -y postgresql15
-              EOF
+  #!/bin/bash
+  dnf update -y
+  dnf install -y postgresql15
+  EOF
 
   tags = {
     Name = "dataops-hub-bastion"
