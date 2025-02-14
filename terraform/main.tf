@@ -94,9 +94,10 @@ resource "aws_rds_cluster" "main" {
   port                            = var.database_port
   backup_retention_period         = var.backup_retention_period
   preferred_backup_window         = "03:00-04:00"
-  skip_final_snapshot             = true
-  deletion_protection             = false # Temporarily disable deletion protection
-  storage_encrypted               = var.storage_encrypted
+  skip_final_snapshot            = true
+  final_snapshot_identifier      = null
+  deletion_protection            = false # Temporarily disable deletion protection
+  storage_encrypted              = var.storage_encrypted
   enabled_cloudwatch_logs_exports = ["postgresql"]
 
   lifecycle {
