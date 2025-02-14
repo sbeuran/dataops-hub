@@ -5,17 +5,17 @@ module "vpc" {
   name = "dataops-hub-vpc"
   cidr = var.vpc_cidr
 
-  azs             = var.availability_zones
-  private_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
-  public_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
+  azs              = var.availability_zones
+  private_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
+  public_subnets   = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
   database_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + 2 * length(var.availability_zones))]
 
   create_database_subnet_group = false
   enable_nat_gateway          = true
-  single_nat_gateway         = false
-  enable_dns_hostnames       = true
-  enable_dns_support         = true
-  create_igw                 = true
+  single_nat_gateway          = false
+  enable_dns_hostnames        = true
+  enable_dns_support          = true
+  create_igw                  = true
 
   tags = {
     Environment = var.environment
@@ -89,14 +89,14 @@ resource "aws_rds_cluster" "main" {
   database_name                   = var.database_name
   master_username                 = var.database_username
   master_password                 = random_password.master.result
-  db_subnet_group_name           = aws_db_subnet_group.public.id
-  vpc_security_group_ids         = [aws_security_group.rds.id]
-  port                           = var.database_port
-  backup_retention_period        = var.backup_retention_period
-  preferred_backup_window        = "03:00-04:00"
-  skip_final_snapshot           = true
-  deletion_protection           = false # Temporarily disable deletion protection
-  storage_encrypted             = var.storage_encrypted
+  db_subnet_group_name            = aws_db_subnet_group.public.id
+  vpc_security_group_ids          = [aws_security_group.rds.id]
+  port                            = var.database_port
+  backup_retention_period         = var.backup_retention_period
+  preferred_backup_window         = "03:00-04:00"
+  skip_final_snapshot            = true
+  deletion_protection            = false # Temporarily disable deletion protection
+  storage_encrypted              = var.storage_encrypted
   enabled_cloudwatch_logs_exports = ["postgresql"]
 
   lifecycle {
@@ -121,16 +121,16 @@ resource "aws_db_subnet_group" "public" {
 
 # RDS Cluster Instances
 resource "aws_rds_cluster_instance" "instances" {
-  count                       = 2
-  identifier                  = "${var.rds_cluster_identifier}-${count.index + 1}"
-  cluster_identifier         = aws_rds_cluster.main.id
-  instance_class             = var.rds_instance_class
-  engine                     = aws_rds_cluster.main.engine
-  engine_version             = var.engine_version
-  db_subnet_group_name       = aws_db_subnet_group.public.id
-  auto_minor_version_upgrade = true
+  count                        = 2
+  identifier                   = "${var.rds_cluster_identifier}-${count.index + 1}"
+  cluster_identifier           = aws_rds_cluster.main.id
+  instance_class               = var.rds_instance_class
+  engine                       = aws_rds_cluster.main.engine
+  engine_version               = var.engine_version
+  db_subnet_group_name         = aws_db_subnet_group.public.id
+  auto_minor_version_upgrade   = true
   performance_insights_enabled = var.enable_performance_insights
-  publicly_accessible        = true
+  publicly_accessible         = true
 }
 
 # Generate random master password for RDS
