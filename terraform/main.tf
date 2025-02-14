@@ -16,7 +16,11 @@ module "vpc" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  create_database_subnet_group = true
+  create_database_subnet_group           = true
+  create_database_subnet_route_table     = true
+  create_database_internet_gateway_route = true
+
+  enable_public_redshift = true  # This will ensure the database subnet has internet access
 }
 
 # Security Group for RDS
@@ -42,11 +46,16 @@ resource "aws_security_group" "rds" {
     description = "Allow PostgreSQL access from admin IP"
   }
 
+  # Allow all outbound traffic
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 
   tags = {
