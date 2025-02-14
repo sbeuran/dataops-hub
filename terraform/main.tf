@@ -95,8 +95,8 @@ resource "aws_rds_cluster_instance" "instances" {
   engine              = aws_rds_cluster.main.engine
   engine_version      = aws_rds_cluster.main.engine_version
 
-  auto_minor_version_upgrade = true
-  performance_insights_enabled = true
+  auto_minor_version_upgrade    = true
+  performance_insights_enabled  = true
 }
 
 # Generate random master password for RDS
