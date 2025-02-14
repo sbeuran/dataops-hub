@@ -5,9 +5,9 @@ module "vpc" {
   name = "dataops-hub-vpc"
   cidr = var.vpc_cidr
 
-  azs             = var.availability_zones
-  private_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
-  public_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
+  azs              = var.availability_zones
+  private_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
+  public_subnets   = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
   database_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + 2 * length(var.availability_zones))]
 
   create_database_subnet_group = false # We're using our own subnet group
@@ -17,7 +17,6 @@ module "vpc" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  # Enable public access through IGW
   create_igw = true
 
   tags = {
@@ -33,24 +32,22 @@ resource "aws_security_group" "rds" {
   description = "Security group for RDS cluster"
   vpc_id      = module.vpc.vpc_id
 
-  # Allow access from application security group
   ingress {
     from_port       = var.database_port
     to_port         = var.database_port
     protocol        = "tcp"
     security_groups = [aws_security_group.app.id]
+    description     = "Allow access from application security group"
   }
 
-  # Allow access from admin IP
   ingress {
-    from_port   = var.database_port
-    to_port     = var.database_port
-    protocol    = "tcp"
-    cidr_blocks = ["89.115.70.77/32"]
-    description = "Allow PostgreSQL access from admin IP"
+    from_port     = var.database_port
+    to_port       = var.database_port
+    protocol      = "tcp"
+    cidr_blocks   = ["89.115.70.77/32"]
+    description   = "Allow PostgreSQL access from admin IP"
   }
 
-  # Allow all outbound traffic
   egress {
     from_port   = 0
     to_port     = 0
@@ -101,7 +98,7 @@ resource "aws_rds_cluster" "main" {
   preferred_backup_window         = "03:00-04:00"
   skip_final_snapshot             = true
   final_snapshot_identifier       = null
-  deletion_protection             = false # Temporarily disable deletion protection
+  deletion_protection             = false
   storage_encrypted               = var.storage_encrypted
   enabled_cloudwatch_logs_exports = ["postgresql"]
 
@@ -126,16 +123,16 @@ resource "aws_db_subnet_group" "public" {
 
 # RDS Cluster Instances
 resource "aws_rds_cluster_instance" "instances" {
-  count                        = 2
-  identifier                   = "${var.rds_cluster_identifier}-${count.index + 1}"
-  cluster_identifier           = aws_rds_cluster.main.id
-  instance_class               = var.rds_instance_class
-  engine                       = aws_rds_cluster.main.engine
-  engine_version               = var.engine_version
-  db_subnet_group_name         = aws_db_subnet_group.public.id
-  auto_minor_version_upgrade   = true
-  performance_insights_enabled = var.enable_performance_insights
-  publicly_accessible          = true
+  count                          = 2
+  identifier                     = "${var.rds_cluster_identifier}-${count.index + 1}"
+  cluster_identifier             = aws_rds_cluster.main.id
+  instance_class                 = var.rds_instance_class
+  engine                         = aws_rds_cluster.main.engine
+  engine_version                 = var.engine_version
+  db_subnet_group_name           = aws_db_subnet_group.public.id
+  auto_minor_version_upgrade     = true
+  performance_insights_enabled   = var.enable_performance_insights
+  publicly_accessible           = true
 }
 
 # Generate random master password for RDS
@@ -150,7 +147,7 @@ resource "aws_secretsmanager_secret" "rds_credentials" {
 }
 
 resource "aws_secretsmanager_secret_version" "rds_credentials" {
-  secret_id = aws_secretsmanager_secret.rds_credentials.id
+  secret_id     = aws_secretsmanager_secret.rds_credentials.id
   secret_string = jsonencode({
     username = var.database_username
     password = random_password.master.result
