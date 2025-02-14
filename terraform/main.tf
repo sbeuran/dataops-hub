@@ -17,7 +17,7 @@ module "vpc" {
   enable_dns_support   = true
 
   create_database_subnet_group = true
-  
+
   # Enable internet access for database subnets through NAT Gateway
   create_database_subnet_route_table     = true
   create_database_internet_gateway_route = false
