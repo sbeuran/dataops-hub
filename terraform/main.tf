@@ -79,26 +79,22 @@ resource "aws_security_group" "app" {
 
 # RDS Aurora PostgreSQL Cluster
 resource "aws_rds_cluster" "main" {
-  cluster_identifier = var.rds_cluster_identifier
-  engine            = "aurora-postgresql"
-  engine_mode       = "provisioned"
-  engine_version    = var.engine_version
-  database_name     = var.database_name
-  master_username   = var.database_username
-  master_password   = random_password.master.result
-
-  skip_final_snapshot = var.skip_final_snapshot
-  deletion_protection = var.deletion_protection
-  storage_encrypted   = var.storage_encrypted
-
-  vpc_security_group_ids = [aws_security_group.rds.id]
-  db_subnet_group_name   = aws_db_subnet_group.public.id
-
-  backup_retention_period = var.backup_retention_period
-  preferred_backup_window = "03:00-04:00"
-
+  cluster_identifier              = var.rds_cluster_identifier
+  engine                          = "aurora-postgresql"
+  engine_mode                     = "provisioned"
+  engine_version                  = var.engine_version
+  database_name                   = var.database_name
+  master_username                 = var.database_username
+  master_password                 = random_password.master.result
+  db_subnet_group_name            = aws_db_subnet_group.public.id
+  vpc_security_group_ids          = [aws_security_group.rds.id]
+  port                            = var.database_port
+  backup_retention_period         = var.backup_retention_period
+  preferred_backup_window         = "03:00-04:00"
+  skip_final_snapshot             = var.skip_final_snapshot
+  deletion_protection             = var.deletion_protection
+  storage_encrypted               = var.storage_encrypted
   enabled_cloudwatch_logs_exports = ["postgresql"]
-  port                           = var.database_port
 
   depends_on = [module.vpc]
 }
@@ -115,18 +111,17 @@ resource "aws_db_subnet_group" "public" {
 
 # RDS Cluster Instances
 resource "aws_rds_cluster_instance" "instances" {
-  count              = 2
-  identifier         = "${var.rds_cluster_identifier}-${count.index + 1}"
-  cluster_identifier = aws_rds_cluster.main.id
-  instance_class     = var.rds_instance_class
-  engine             = aws_rds_cluster.main.engine
-  engine_version     = var.engine_version
+  count                = 2
+  identifier           = "${var.rds_cluster_identifier}-${count.index + 1}"
+  cluster_identifier   = aws_rds_cluster.main.id
+  instance_class       = var.rds_instance_class
+  engine               = aws_rds_cluster.main.engine
+  engine_version       = var.engine_version
+  db_subnet_group_name = aws_db_subnet_group.public.id
 
   auto_minor_version_upgrade   = true
   performance_insights_enabled = var.enable_performance_insights
-  publicly_accessible         = true
-
-  db_subnet_group_name = aws_db_subnet_group.public.id
+  publicly_accessible          = true
 }
 
 # Generate random master password for RDS
