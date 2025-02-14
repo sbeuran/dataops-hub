@@ -8,15 +8,23 @@ module "vpc" {
   azs             = var.availability_zones
   private_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
   public_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
+  database_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + 2 * length(var.availability_zones))]
 
-  enable_nat_gateway = true
-  single_nat_gateway = false
+  create_database_subnet_group = false # We're using our own subnet group
+  enable_nat_gateway          = true
+  single_nat_gateway         = false
 
   enable_dns_hostnames = true
   enable_dns_support   = true
 
   # Enable public access through IGW
   create_igw = true
+
+  tags = {
+    Environment = var.environment
+    Project     = "dataops-hub"
+    ManagedBy   = "terraform"
+  }
 }
 
 # Security Group for RDS
