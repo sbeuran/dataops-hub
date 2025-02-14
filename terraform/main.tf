@@ -89,10 +89,10 @@ resource "aws_rds_cluster" "main" {
 
 # RDS Cluster Instances
 resource "aws_rds_cluster_instance" "instances" {
-  count               = 2
-  identifier          = "${var.rds_cluster_identifier}-${count.index + 1}"
-  cluster_identifier  = aws_rds_cluster.main.id
-  instance_class      = var.rds_instance_class
+  count              = 2
+  identifier         = "${var.rds_cluster_identifier}-${count.index + 1}"
+  cluster_identifier = aws_rds_cluster.main.id
+  instance_class     = var.rds_instance_class
   engine             = aws_rds_cluster.main.engine
   engine_version     = var.engine_version
 
