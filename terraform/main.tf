@@ -83,6 +83,7 @@ resource "aws_security_group" "app" {
 }
 
 # Security Group for Bastion Host
+/*
 resource "aws_security_group" "bastion" {
   name        = "dataops-hub-bastion-sg"
   description = "Security group for bastion host"
@@ -116,7 +117,7 @@ resource "aws_instance" "bastion" {
   associate_public_ip_address = true
 
   vpc_security_group_ids = [aws_security_group.bastion.id]
-  key_name               = "dataops-hub-bastion"
+  key_name              = "dataops-hub-bastion"
 
   user_data = <<-EOF
 #!/bin/bash
@@ -139,6 +140,13 @@ resource "aws_security_group_rule" "rds_bastion" {
   security_group_id        = aws_security_group.rds.id
   description              = "Allow PostgreSQL access from bastion host"
 }
+
+# Add bastion host public IP output
+output "bastion_public_ip" {
+  description = "Public IP of the bastion host"
+  value       = aws_instance.bastion.public_ip
+}
+*/
 
 # RDS Aurora PostgreSQL Cluster
 resource "aws_rds_cluster" "main" {
@@ -241,10 +249,4 @@ output "s3_bucket_name" {
 output "secrets_manager_secret_name" {
   description = "Name of the Secrets Manager secret containing RDS credentials"
   value       = aws_secretsmanager_secret.rds_credentials.name
-}
-
-# Add bastion host public IP output
-output "bastion_public_ip" {
-  description = "Public IP of the bastion host"
-  value       = aws_instance.bastion.public_ip
 }
