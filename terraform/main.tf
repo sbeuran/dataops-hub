@@ -11,11 +11,11 @@ module "vpc" {
   database_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + 2 * length(var.availability_zones))]
 
   create_database_subnet_group = false
-  enable_nat_gateway          = true
-  single_nat_gateway          = false
-  enable_dns_hostnames        = true
-  enable_dns_support          = true
-  create_igw                  = true
+  enable_nat_gateway           = true
+  single_nat_gateway           = false
+  enable_dns_hostnames         = true
+  enable_dns_support           = true
+  create_igw                   = true
 
   tags = {
     Environment = var.environment
@@ -39,11 +39,11 @@ resource "aws_security_group" "rds" {
   }
 
   ingress {
-    from_port     = var.database_port
-    to_port       = var.database_port
-    protocol      = "tcp"
-    cidr_blocks   = ["89.115.70.77/32"]
-    description   = "Allow PostgreSQL access from admin IP"
+    from_port   = var.database_port
+    to_port     = var.database_port
+    protocol    = "tcp"
+    cidr_blocks = ["89.115.70.77/32"]
+    description = "Allow PostgreSQL access from admin IP"
   }
 
   egress {
@@ -145,7 +145,7 @@ resource "aws_secretsmanager_secret" "rds_credentials" {
 }
 
 resource "aws_secretsmanager_secret_version" "rds_credentials" {
-  secret_id     = aws_secretsmanager_secret.rds_credentials.id
+  secret_id = aws_secretsmanager_secret.rds_credentials.id
   secret_string = jsonencode({
     username = var.database_username
     password = random_password.master.result
