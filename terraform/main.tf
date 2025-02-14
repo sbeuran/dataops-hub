@@ -17,9 +17,11 @@ module "vpc" {
   enable_dns_support   = true
 
   create_database_subnet_group = true
-
-  # Place RDS in private subnets with NAT Gateway access
-  create_database_subnet_route_table = false
+  
+  # Enable internet access for database subnets through NAT Gateway
+  create_database_subnet_route_table     = true
+  create_database_internet_gateway_route = false
+  create_database_nat_gateway_route      = true
 }
 
 # Security Group for RDS
@@ -36,13 +38,13 @@ resource "aws_security_group" "rds" {
     security_groups = [aws_security_group.app.id]
   }
 
-  # Allow access from public subnets
+  # Allow access from admin IP
   ingress {
     from_port   = var.database_port
     to_port     = var.database_port
     protocol    = "tcp"
-    cidr_blocks = [for subnet in module.vpc.public_subnets_cidr_blocks : subnet]
-    description = "Allow PostgreSQL access from public subnets"
+    cidr_blocks = ["89.115.70.77/32"]
+    description = "Allow PostgreSQL access from admin IP"
   }
 
   # Allow all outbound traffic
@@ -77,54 +79,6 @@ resource "aws_security_group" "app" {
 
   tags = {
     Name = "dataops-hub-app-sg"
-  }
-}
-
-# Security Group for Bastion Host
-resource "aws_security_group" "bastion" {
-  name        = "dataops-hub-bastion-sg"
-  description = "Security group for bastion host"
-  vpc_id      = module.vpc.vpc_id
-
-  # Allow SSH access from your IP
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["89.115.70.77/32"]
-    description = "Allow SSH access from admin IP"
-  }
-
-  # Allow all outbound traffic
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "dataops-hub-bastion-sg"
-  }
-}
-
-# EC2 Instance for Bastion Host
-resource "aws_instance" "bastion" {
-  ami           = "ami-0faab6bdbac9486fb" # Amazon Linux 2023 in eu-central-1
-  instance_type = "t3.micro"
-
-  subnet_id                   = module.vpc.public_subnets[0]
-  vpc_security_group_ids      = [aws_security_group.bastion.id]
-  associate_public_ip_address = true
-
-  user_data = <<-EOF
-              #!/bin/bash
-              dnf update -y
-              dnf install -y postgresql15
-              EOF
-
-  tags = {
-    Name = "dataops-hub-bastion"
   }
 }
 
@@ -229,9 +183,4 @@ output "s3_bucket_name" {
 output "secrets_manager_secret_name" {
   description = "Name of the Secrets Manager secret containing RDS credentials"
   value       = aws_secretsmanager_secret.rds_credentials.name
-}
-
-output "bastion_public_ip" {
-  description = "Public IP of the bastion host"
-  value       = aws_instance.bastion.public_ip
 }
