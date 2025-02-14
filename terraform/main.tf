@@ -95,10 +95,17 @@ resource "aws_rds_cluster" "main" {
   backup_retention_period         = var.backup_retention_period
   preferred_backup_window         = "03:00-04:00"
   skip_final_snapshot             = true
-  final_snapshot_identifier       = "dataops-hub-final-snapshot"
-  deletion_protection             = var.deletion_protection
+  deletion_protection             = false  # Temporarily disable deletion protection
   storage_encrypted               = var.storage_encrypted
   enabled_cloudwatch_logs_exports = ["postgresql"]
+
+  # Add lifecycle rule to handle destroy-time behavior
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = [
+      final_snapshot_identifier
+    ]
+  }
 
   depends_on = [module.vpc]
 }
