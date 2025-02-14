@@ -80,7 +80,7 @@ variable "engine_version" {
 variable "skip_final_snapshot" {
   description = "Whether to skip final snapshot when destroying the cluster"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "storage_encrypted" {
