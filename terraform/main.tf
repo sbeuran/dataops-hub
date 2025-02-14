@@ -126,7 +126,6 @@ resource "aws_rds_cluster_instance" "instances" {
   performance_insights_enabled = var.enable_performance_insights
   publicly_accessible         = true
 
-  # Use the public subnet group
   db_subnet_group_name = aws_db_subnet_group.public.id
 }
 
