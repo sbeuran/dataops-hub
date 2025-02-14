@@ -3,13 +3,6 @@ name: Terraform Destroy
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Environment to destroy'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
       confirm_destroy:
         description: 'Type "DESTROY-PRODUCTION" to confirm deletion of all resources'
         required: true
@@ -25,7 +18,8 @@ env:
   TERRAFORM_VERSION: 1.4.6
 
 jobs:
-  validate-destroy:
+  destroy:
+    name: Destroy Infrastructure
     runs-on: ubuntu-latest
     if: github.event.inputs.confirm_destroy == 'DESTROY-PRODUCTION'
     environment: production
@@ -65,8 +59,8 @@ jobs:
         echo "- S3 Buckets"
         echo "- Secrets Manager Secrets"
         echo ""
-        echo "Waiting 60 seconds before destruction begins..."
-        sleep 60
+        echo "Waiting 30 seconds before destruction begins..."
+        sleep 30
 
     - name: Terraform Destroy
       working-directory: ./terraform
