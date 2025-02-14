@@ -5,9 +5,9 @@ module "vpc" {
   name = "dataops-hub-vpc"
   cidr = var.vpc_cidr
 
-  azs             = var.availability_zones
-  private_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
-  public_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
+  azs              = var.availability_zones
+  private_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
+  public_subnets   = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
   database_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + 2 * length(var.availability_zones))]
 
   enable_nat_gateway = true
@@ -64,16 +64,16 @@ resource "aws_security_group" "app" {
 
 # RDS Aurora PostgreSQL Cluster
 resource "aws_rds_cluster" "main" {
-  cluster_identifier     = var.rds_cluster_identifier
-  engine                = "aurora-postgresql"
-  engine_mode           = "provisioned"
-  engine_version        = "13.8"
-  database_name         = var.database_name
-  master_username       = var.database_username
-  master_password       = random_password.master.result
-  skip_final_snapshot   = false
-  deletion_protection   = var.deletion_protection
-  storage_encrypted     = true
+  cluster_identifier  = var.rds_cluster_identifier
+  engine              = "aurora-postgresql"
+  engine_mode         = "provisioned"
+  engine_version      = "13.8"
+  database_name       = var.database_name
+  master_username     = var.database_username
+  master_password     = random_password.master.result
+  skip_final_snapshot = false
+  deletion_protection = var.deletion_protection
+  storage_encrypted   = true
 
   vpc_security_group_ids = [aws_security_group.rds.id]
   db_subnet_group_name   = module.vpc.database_subnet_group_name
