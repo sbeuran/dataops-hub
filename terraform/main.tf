@@ -20,7 +20,7 @@ module "vpc" {
   create_database_subnet_route_table     = true
   create_database_internet_gateway_route = true
 
-  enable_public_redshift = true  # This will ensure the database subnet has internet access
+  enable_public_redshift = true # This will ensure the database subnet has internet access
 }
 
 # Security Group for RDS
