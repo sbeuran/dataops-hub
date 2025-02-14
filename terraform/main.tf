@@ -11,11 +11,11 @@ module "vpc" {
   database_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + 2 * length(var.availability_zones))]
 
   create_database_subnet_group = false
-  enable_nat_gateway          = true
-  single_nat_gateway          = false
-  enable_dns_hostnames        = true
-  enable_dns_support          = true
-  create_igw                  = true
+  enable_nat_gateway           = true
+  single_nat_gateway           = false
+  enable_dns_hostnames         = true
+  enable_dns_support           = true
+  create_igw                   = true
 
   tags = {
     Environment = var.environment
@@ -94,9 +94,9 @@ resource "aws_rds_cluster" "main" {
   port                            = var.database_port
   backup_retention_period         = var.backup_retention_period
   preferred_backup_window         = "03:00-04:00"
-  skip_final_snapshot            = true
-  deletion_protection            = false # Temporarily disable deletion protection
-  storage_encrypted              = var.storage_encrypted
+  skip_final_snapshot             = true
+  deletion_protection             = false # Temporarily disable deletion protection
+  storage_encrypted               = var.storage_encrypted
   enabled_cloudwatch_logs_exports = ["postgresql"]
 
   lifecycle {
@@ -130,7 +130,7 @@ resource "aws_rds_cluster_instance" "instances" {
   db_subnet_group_name         = aws_db_subnet_group.public.id
   auto_minor_version_upgrade   = true
   performance_insights_enabled = var.enable_performance_insights
-  publicly_accessible         = true
+  publicly_accessible          = true
 }
 
 # Generate random master password for RDS
