@@ -74,7 +74,7 @@ variable "deletion_protection" {
 variable "engine_version" {
   description = "Aurora PostgreSQL engine version"
   type        = string
-  default     = "14.7"
+  default     = "15.3"
 }
 
 variable "skip_final_snapshot" {
