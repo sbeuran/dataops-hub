@@ -64,16 +64,17 @@ resource "aws_security_group" "app" {
 
 # RDS Aurora PostgreSQL Cluster
 resource "aws_rds_cluster" "main" {
-  cluster_identifier  = var.rds_cluster_identifier
-  engine              = "aurora-postgresql"
-  engine_mode         = "provisioned"
-  engine_version      = "13.8"
-  database_name       = var.database_name
-  master_username     = var.database_username
-  master_password     = random_password.master.result
-  skip_final_snapshot = false
-  deletion_protection = var.deletion_protection
-  storage_encrypted   = true
+  cluster_identifier     = var.rds_cluster_identifier
+  engine                = "aurora-postgresql"
+  engine_mode           = "provisioned"
+  engine_version        = var.engine_version
+  database_name         = var.database_name
+  master_username       = var.database_username
+  master_password       = random_password.master.result
+  
+  skip_final_snapshot   = var.skip_final_snapshot
+  deletion_protection   = var.deletion_protection
+  storage_encrypted     = var.storage_encrypted
 
   vpc_security_group_ids = [aws_security_group.rds.id]
   db_subnet_group_name   = module.vpc.database_subnet_group_name
@@ -88,15 +89,15 @@ resource "aws_rds_cluster" "main" {
 
 # RDS Cluster Instances
 resource "aws_rds_cluster_instance" "instances" {
-  count              = 2
-  identifier         = "${var.rds_cluster_identifier}-${count.index + 1}"
-  cluster_identifier = aws_rds_cluster.main.id
-  instance_class     = var.rds_instance_class
+  count               = 2
+  identifier          = "${var.rds_cluster_identifier}-${count.index + 1}"
+  cluster_identifier  = aws_rds_cluster.main.id
+  instance_class      = var.rds_instance_class
   engine             = aws_rds_cluster.main.engine
-  engine_version     = aws_rds_cluster.main.engine_version
+  engine_version     = var.engine_version
 
   auto_minor_version_upgrade   = true
-  performance_insights_enabled = true
+  performance_insights_enabled = var.enable_performance_insights
 }
 
 # Generate random master password for RDS

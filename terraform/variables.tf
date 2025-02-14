@@ -37,6 +37,7 @@ variable "database_name" {
 variable "database_username" {
   description = "Master username for the database"
   type        = string
+  sensitive   = true
   default     = "admin"
 }
 
@@ -66,6 +67,30 @@ variable "backup_retention_period" {
 
 variable "deletion_protection" {
   description = "Enable deletion protection"
+  type        = bool
+  default     = true
+}
+
+variable "engine_version" {
+  description = "Aurora PostgreSQL engine version"
+  type        = string
+  default     = "14.7"
+}
+
+variable "skip_final_snapshot" {
+  description = "Whether to skip final snapshot when destroying the cluster"
+  type        = bool
+  default     = false
+}
+
+variable "storage_encrypted" {
+  description = "Whether to encrypt the storage"
+  type        = bool
+  default     = true
+}
+
+variable "enable_performance_insights" {
+  description = "Whether to enable Performance Insights"
   type        = bool
   default     = true
 } 

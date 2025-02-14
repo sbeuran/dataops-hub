@@ -1,3 +1,10 @@
 # AWS Credentials
 *_accessKeys.csv
 *_credentials.csv 
+
+# Terraform
+*.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl 
