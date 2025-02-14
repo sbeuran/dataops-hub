@@ -16,11 +16,10 @@ module "vpc" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  create_database_subnet_group           = true
-  create_database_subnet_route_table     = true
-  create_database_internet_gateway_route = true
+  create_database_subnet_group = true
 
-  enable_public_redshift = true # This will ensure the database subnet has internet access
+  # Place RDS in private subnets with NAT Gateway access
+  create_database_subnet_route_table = false
 }
 
 # Security Group for RDS
