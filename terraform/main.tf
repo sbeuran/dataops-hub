@@ -17,11 +17,8 @@ module "vpc" {
   enable_dns_support   = true
 
   create_database_subnet_group = true
-
-  # Use NAT Gateway for outbound connectivity
-  create_database_subnet_route_table     = false
-  create_database_internet_gateway_route = false
-  create_database_nat_gateway_route      = false
+  create_database_subnet_route_table = true
+  create_database_internet_gateway_route = true
 }
 
 # Security Group for RDS
@@ -118,6 +115,7 @@ resource "aws_rds_cluster_instance" "instances" {
 
   auto_minor_version_upgrade   = true
   performance_insights_enabled = var.enable_performance_insights
+  publicly_accessible         = true
 }
 
 # Generate random master password for RDS
