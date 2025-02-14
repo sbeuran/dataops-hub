@@ -1,0 +1,76 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to destroy'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+      confirm_destroy:
+        description: 'Type "DESTROY-PRODUCTION" to confirm deletion of all resources'
+        required: true
+        type: string
+
+# Prevent concurrent destroy operations
+concurrency: 
+  group: terraform-destroy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: eu-central-1
+  TERRAFORM_VERSION: 1.4.6
+
+jobs:
+  validate-destroy:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm_destroy == 'DESTROY-PRODUCTION'
+    environment: production
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+    - name: Terraform Init
+      working-directory: ./terraform
+      run: terraform init
+
+    - name: Terraform Plan Destroy
+      working-directory: ./terraform
+      run: |
+        echo "🔍 Planning destruction of all resources..."
+        terraform plan -destroy -out=destroy.tfplan
+      
+    - name: Final Warning
+      run: |
+        echo "⚠️ DANGER: You are about to destroy all resources in PRODUCTION ⚠️"
+        echo "Resources that will be destroyed:"
+        echo "- RDS Aurora PostgreSQL Cluster and Instances"
+        echo "- VPC and all networking components"
+        echo "- Security Groups"
+        echo "- S3 Buckets"
+        echo "- Secrets Manager Secrets"
+        echo ""
+        echo "Waiting 60 seconds before destruction begins..."
+        sleep 60
+
+    - name: Terraform Destroy
+      working-directory: ./terraform
+      run: |
+        echo "💥 Beginning destruction of resources..."
+        terraform apply -auto-approve destroy.tfplan
+        echo "✅ All resources have been destroyed." 
