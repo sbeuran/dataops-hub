@@ -19,7 +19,7 @@ variable "vpc_cidr" {
 variable "rds_instance_class" {
   description = "RDS instance class"
   type        = string
-  default     = "db.r5.large"
+  default     = "db.t3.small"
 }
 
 variable "rds_cluster_identifier" {
