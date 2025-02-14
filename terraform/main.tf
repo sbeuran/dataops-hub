@@ -94,8 +94,8 @@ resource "aws_rds_cluster" "main" {
   port                            = var.database_port
   backup_retention_period         = var.backup_retention_period
   preferred_backup_window         = "03:00-04:00"
-  skip_final_snapshot             = var.skip_final_snapshot
-  final_snapshot_identifier       = "${var.rds_cluster_identifier}-final-snapshot-${formatdate("YYYYMMDDHHmmss", timestamp())}"
+  skip_final_snapshot             = true
+  final_snapshot_identifier       = "dataops-hub-final-snapshot"
   deletion_protection             = var.deletion_protection
   storage_encrypted               = var.storage_encrypted
   enabled_cloudwatch_logs_exports = ["postgresql"]
