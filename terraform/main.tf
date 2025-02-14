@@ -5,9 +5,9 @@ module "vpc" {
   name = "dataops-hub-vpc"
   cidr = var.vpc_cidr
 
-  azs              = var.availability_zones
-  private_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
-  public_subnets   = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
+  azs             = var.availability_zones
+  private_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
+  public_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
   database_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + 2 * length(var.availability_zones))]
 
   enable_nat_gateway = true
@@ -88,15 +88,15 @@ resource "aws_rds_cluster" "main" {
 
 # RDS Cluster Instances
 resource "aws_rds_cluster_instance" "instances" {
-  count               = 2
-  identifier          = "${var.rds_cluster_identifier}-${count.index + 1}"
-  cluster_identifier  = aws_rds_cluster.main.id
-  instance_class      = var.rds_instance_class
-  engine              = aws_rds_cluster.main.engine
-  engine_version      = aws_rds_cluster.main.engine_version
+  count              = 2
+  identifier         = "${var.rds_cluster_identifier}-${count.index + 1}"
+  cluster_identifier = aws_rds_cluster.main.id
+  instance_class     = var.rds_instance_class
+  engine             = aws_rds_cluster.main.engine
+  engine_version     = aws_rds_cluster.main.engine_version
 
-  auto_minor_version_upgrade    = true
-  performance_insights_enabled  = true
+  auto_minor_version_upgrade   = true
+  performance_insights_enabled = true
 }
 
 # Generate random master password for RDS
