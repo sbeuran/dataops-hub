@@ -38,7 +38,7 @@ variable "database_username" {
   description = "Master username for the database"
   type        = string
   sensitive   = true
-  default     = "admin"
+  default     = "dbadmin"
 }
 
 variable "database_port" {
