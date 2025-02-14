@@ -5,10 +5,9 @@ module "vpc" {
   name = "dataops-hub-vpc"
   cidr = var.vpc_cidr
 
-  azs              = var.availability_zones
-  private_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
-  public_subnets   = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
-  database_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + 2 * length(var.availability_zones))]
+  azs             = var.availability_zones
+  private_subnets = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i)]
+  public_subnets  = [for i, az in var.availability_zones : cidrsubnet(var.vpc_cidr, 8, i + length(var.availability_zones))]
 
   enable_nat_gateway = true
   single_nat_gateway = false
@@ -16,7 +15,8 @@ module "vpc" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  create_database_subnet_group = true
+  # Enable public access through IGW
+  create_igw = true
 }
 
 # Security Group for RDS
@@ -80,26 +80,37 @@ resource "aws_security_group" "app" {
 # RDS Aurora PostgreSQL Cluster
 resource "aws_rds_cluster" "main" {
   cluster_identifier = var.rds_cluster_identifier
-  engine             = "aurora-postgresql"
-  engine_mode        = "provisioned"
-  engine_version     = var.engine_version
-  database_name      = var.database_name
-  master_username    = var.database_username
-  master_password    = random_password.master.result
+  engine            = "aurora-postgresql"
+  engine_mode       = "provisioned"
+  engine_version    = var.engine_version
+  database_name     = var.database_name
+  master_username   = var.database_username
+  master_password   = random_password.master.result
 
   skip_final_snapshot = var.skip_final_snapshot
   deletion_protection = var.deletion_protection
   storage_encrypted   = var.storage_encrypted
 
   vpc_security_group_ids = [aws_security_group.rds.id]
-  db_subnet_group_name   = module.vpc.database_subnet_group_name
+  db_subnet_group_name   = aws_db_subnet_group.public.id
 
   backup_retention_period = var.backup_retention_period
   preferred_backup_window = "03:00-04:00"
 
   enabled_cloudwatch_logs_exports = ["postgresql"]
+  port                           = var.database_port
 
   depends_on = [module.vpc]
+}
+
+# Create a subnet group using public subnets
+resource "aws_db_subnet_group" "public" {
+  name       = "dataops-hub-public"
+  subnet_ids = module.vpc.public_subnets
+
+  tags = {
+    Name = "dataops-hub-public"
+  }
 }
 
 # RDS Cluster Instances
@@ -113,7 +124,10 @@ resource "aws_rds_cluster_instance" "instances" {
 
   auto_minor_version_upgrade   = true
   performance_insights_enabled = var.enable_performance_insights
-  publicly_accessible          = true
+  publicly_accessible         = true
+
+  # Use the public subnet group
+  db_subnet_group_name = aws_db_subnet_group.public.id
 }
 
 # Generate random master password for RDS
